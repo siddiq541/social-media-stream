@@ -1,3 +1,5 @@
 export default function Home() {
-  return <h1 className="text-2xl font-bold">Hello Next.js!</h1>;
+  return <h2 className="text-xl font-bold text-green-500">Muhammad Siddiq</h2>;
+
+
 }
