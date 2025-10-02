@@ -1,26 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const PostForm = ({ onPostSubmit }) => {
-  const [formData, setFormData] = useState({
-    content: '',
-    image: ''
-  });
+  const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.content.trim()) {
+    if (!content.trim()) {
       alert('Please enter some content for your post');
       return;
     }
@@ -31,88 +20,59 @@ const PostForm = ({ onPostSubmit }) => {
     const newPost = {
       id: Date.now(), // Simple ID generation
       author: {
-        name: "Muhammad Siddiq", // Current user
-        username: "@siddiq",
-        avatar: "/avatars/siddiq.jpg"
+        name: "Current User",
+        username: "@currentuser",
+        avatar: "/avatars/default.jpg"
       },
-      content: formData.content.trim(),
+      content: content.trim(),
       timestamp: new Date().toISOString(),
       likes: 0,
       comments: 0,
       shares: 0,
-      image: formData.image.trim() || null
+      image: null
     };
 
-    try {
-      // Call the parent component's callback to add the post
-      if (onPostSubmit) {
-        await onPostSubmit(newPost);
-      }
-
-      // Reset form
-      setFormData({
-        content: '',
-        image: ''
-      });
-
-      // Show success message
-      alert('Post submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting post:', error);
-      alert('Failed to submit post. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    // Call the parent component's callback to add the post
+    if (onPostSubmit) {
+      onPostSubmit(newPost);
     }
+
+    // Reset form
+    setContent('');
+    setIsSubmitting(false);
   };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">Create a New Post</h3>
+      <h2 className="text-xl font-bold mb-4 text-gray-800">Create a New Post</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Content textarea */}
-        <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-            What's on your mind?
-          </label>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
           <textarea
-            id="content"
-            name="content"
-            value={formData.content}
-            onChange={handleInputChange}
-            placeholder="Share your thoughts..."
-            rows={4}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            disabled={isSubmitting}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="What's on your mind?"
+            className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            rows="4"
+            maxLength="500"
           />
+          <div className="text-right text-sm text-gray-500 mt-1">
+            {content.length}/500 characters
+          </div>
         </div>
 
-        {/* Optional image URL */}
-        <div>
-          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
-            Image URL (optional)
-          </label>
-          <input
-            type="url"
-            id="image"
-            name="image"
-            value={formData.image}
-            onChange={handleInputChange}
-            placeholder="https://example.com/image.jpg"
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        {/* Submit button */}
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-gray-500">
+            Share your thoughts with the community
+          </div>
+          
           <button
             type="submit"
-            disabled={isSubmitting || !formData.content.trim()}
+            disabled={isSubmitting || !content.trim()}
             className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-              isSubmitting || !formData.content.trim()
+              isSubmitting || !content.trim()
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
             }`}
           >
             {isSubmitting ? 'Posting...' : 'Post'}
