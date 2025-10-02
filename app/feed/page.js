@@ -1,15 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import SocialCard from '../../components/SocialCard/SocialCard';
-import { posts as initialPosts } from '../../lib/posts';
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    setPosts(initialPosts);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,7 +21,7 @@ export default function Feed() {
             ))
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No posts available.</p>
+              <p className="text-gray-500">No posts available. Create your first post!</p>
             </div>
           )}
         </div>

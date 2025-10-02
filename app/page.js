@@ -1,17 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PostForm from '../components/PostForm/PostForm';
 import SocialCard from '../components/SocialCard/SocialCard';
-import { posts as initialPosts } from '../lib/posts';
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
-
-  // Load initial posts on component mount
-  useEffect(() => {
-    setPosts(initialPosts);
-  }, []);
 
   // Function to handle new post submission
   const handlePostSubmit = (newPost) => {
@@ -24,7 +18,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Social Media Stream</h1>
-          <h2 className="text-xl font-bold text-green-500">Muhammad Siddiq</h2>
+          <p className="text-gray-600">Share your thoughts and see what others are posting!</p>
         </div>
 
         {/* Post Form */}
