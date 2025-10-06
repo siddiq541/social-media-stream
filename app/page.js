@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getAllPosts, addNewPost } from "@/lib/posts";
 import PostForm from "@/components/PostForm/PostForm";
 import SocialCard from "@/components/SocialCard/SocialCard";
+import Feed from "@/components/Feed/Feed";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -24,7 +25,10 @@ export default function Home() {
       <div className="hidden"></div>
       <div className="w-full lg:[70%] xl:[50%]">
         <div className="flex flex-col gap-6">
-          <PostForm onPostSubmit={handlePostSubmit} />
+          <div className="flex flex-col gap-6">
+            <PostForm onPostSubmit={handlePostSubmit} />
+            <Feed />
+          </div>
         </div>
       </div>
       <div className="hidden"></div>

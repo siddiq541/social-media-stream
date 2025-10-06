@@ -4,14 +4,15 @@ import { react, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
+import AddPost from "@/app/Add-Post/page";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="flex items-center justify-between h-24">
+    <nav className="flex items-center justify-between h-24 md:mx-auto md:w-3/4 xl:w-[60%] xl:mx-auto">
       {/* Left */}
-      <div className="md:hidden lg:block w-[20%">
+      <div className="md:hidden lg:block w-[20%]">
         <Link href="/" className="text-xl font-bold text-blue-600 uppercase">
           Social Stream
         </Link>
@@ -40,7 +41,7 @@ export default function Navbar() {
             />
             <span>Feed</span>
           </Link>
-          <Link href="/add-post" className="flex items-center gap-2">
+          <Link href="/Add-Post" className="flex items-center gap-2">
             <Image
               src="/img/addPost.png"
               alt="Add Post"
@@ -53,7 +54,7 @@ export default function Navbar() {
         </div>
       </div>
       {/* Right */}
-      <div className="w-[30%] flex items-center gap-4 xl:gap-8 justify-end">
+      <div className="w-[40%] flex items-center gap-4 xl:gap-8 justify-end">
         {/* Search */}
         <div className="items-center hidden p-2 xl:flex bg-slate-100 rounded-xl">
           <input

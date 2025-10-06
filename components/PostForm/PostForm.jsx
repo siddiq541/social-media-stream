@@ -44,7 +44,7 @@ const PostForm = ({ onPostSubmit }) => {
   };
 
   return (
-    <div className="flex justify-between w-[60%] gap-4 p-4 mx-auto text-sm bg-white rounded-lg shadow-md">
+    <div className="flex justify-between gap-4 p-4 text-sm bg-white rounded-lg shadow-md md:mx-auto md:w-3/4 xl:w-[60%] xl:mx-auto">
       {/* AVATAR */}
       <Image
         src="https://images.pexels.com/photos/33435611/pexels-photo-33435611.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
