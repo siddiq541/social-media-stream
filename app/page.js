@@ -20,34 +20,42 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-2xl px-4 py-8 mx-auto">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Social Media Stream
-          </h1>
-          <p className="text-gray-600">
-            Share your thoughts and see what others are posting!
-          </p>
-        </div>
-
-        {/* Post Form */}
-        <PostForm onPostSubmit={handlePostSubmit} />
-
-        {/* Posts Feed */}
-        <div className="mt-6 space-y-4">
-          {posts.length > 0 ? (
-            posts.map((post) => <SocialCard key={post.id} post={post} />)
-          ) : (
-            <div className="py-8 text-center">
-              <p className="text-gray-500">
-                No posts yet. Be the first to share something!
-              </p>
-            </div>
-          )}
+    <div className="flex gap-6 pt-6">
+      <div className="hidden"></div>
+      <div className="w-full lg:[70%] xl:[50%]">
+        <div className="flex flex-col gap-6">
+          <PostForm onPostSubmit={handlePostSubmit} />
         </div>
       </div>
+      <div className="hidden"></div>
     </div>
   );
 }
+
+// <div className="container max-w-2xl px-4 py-8 mx-auto">
+//   {/* Header */}
+//   <div className="mb-8 text-center">
+//     <h1 className="mb-2 text-3xl font-bold text-gray-900">
+//       Social Media Stream
+//     </h1>
+//     <p className="text-gray-600">
+//       Share your thoughts and see what others are posting!
+//     </p>
+//   </div>
+
+//   {/* Post Form */}
+//   <PostForm onPostSubmit={handlePostSubmit} />
+
+//   {/* Posts Feed */}
+//   <div className="mt-6 space-y-4">
+//     {posts.length > 0 ? (
+//       posts.map((post) => <SocialCard key={post.id} post={post} />)
+//     ) : (
+//       <div className="py-8 text-center">
+//         <p className="text-gray-500">
+//           No posts yet. Be the first to share something!
+//         </p>
+//       </div>
+//     )}
+//   </div>
+// </div>
