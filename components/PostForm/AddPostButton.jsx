@@ -8,6 +8,7 @@ const AddPostButton = () => {
     <button
       className="p-2 mt-2 text-white bg-blue-500 rounded-md disabled:bg-blue-300 disabled:cursor-not-allowed"
       disabled={pending}
+      type="submit"
     >
       {pending ? (
         <div className="flex items-center gap-2">

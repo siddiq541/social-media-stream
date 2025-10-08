@@ -31,7 +31,7 @@ export default function Navbar() {
             />
             <span>Home</span>
           </Link>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/Feed" className="flex items-center gap-2">
             <Image
               src="/img/feed.png"
               alt="Feed"

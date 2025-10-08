@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import AddPostButton from "./AddPostButton";
-const PostForm = ({ onPostSubmit }) => {
+import useClickOutside from "@/hooks/useClickOutside";
+const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmojis, setShowEmojis] = useState(false);
+  const emojis = ["😊", "😂", "❤️", "👍", "🔥"];
+
+  const emojiRef = useRef(null);
+  useClickOutside(emojiRef, () => setShowEmojis(false));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,15 +26,11 @@ const PostForm = ({ onPostSubmit }) => {
     // Create new post object
     const newPost = {
       id: Date.now(), // Simple ID generation
-      author: {
-        name: "Current User",
-        username: "@currentuser",
-        avatar: "/avatars/default.jpg",
-      },
+      author: currentUser, // use the passed current user
       content: content.trim(),
       timestamp: new Date().toISOString(),
       likes: 0,
-      comments: 0,
+      comments: [], // initialize as empty array
       shares: 0,
       image: null,
     };
@@ -47,29 +49,55 @@ const PostForm = ({ onPostSubmit }) => {
     <div className="flex justify-between gap-4 p-4 text-sm bg-white rounded-lg shadow-md md:mx-auto md:w-3/4 xl:w-[60%] xl:mx-auto">
       {/* AVATAR */}
       <Image
-        src="https://images.pexels.com/photos/33435611/pexels-photo-33435611.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
-        alt=""
+        src={currentUser?.avatar || "/img/profile.png"} // fallback in case avatar is missing
+        alt={currentUser?.name || "User avatar"}
         width={48}
         height={48}
-        className="object-cover w-12 h-12 rounded-full"
+        onClick={onSwitchUser} // handler passed from page
+        className="object-cover w-12 h-12 rounded-full cursor-pointer"
       />
       {/* POST */}
-      <div className="flex-1">
+      <form onSubmit={handleSubmit} className="flex-1">
         {/* TEXT INPUT */}
         <div className="flex gap-4">
           <textarea
-            name=""
+            name="desc"
             id=""
             placeholder="What's on your mind?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             className="flex-1 p-2 rounded-lg bg-slate-100"
           ></textarea>
-          <Image
-            src="/img/emoji.png"
-            alt=""
-            width={20}
-            height={20}
-            className="self-end w-5 h-5 cursor-pointer"
-          />
+          <div className="relative">
+            <Image
+              src="/img/emoji.png"
+              alt=""
+              width={20}
+              height={20}
+              onClick={() => setShowEmojis(!showEmojis)}
+              className="self-end w-5 h-5 cursor-pointer"
+            />
+            {showEmojis && (
+              <div
+                ref={emojiRef}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 z-10 flex gap-2 p-2 mb-2 bg-white border bottom-full rounded-xl shadow-l"
+              >
+                {emojis.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      setContent((prev) => prev + emoji);
+                    }}
+                    className="text-2xl transition-transform hover:scale-110"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <AddPostButton />
         </div>
         {/* POST OPTIONS */}
@@ -91,7 +119,7 @@ const PostForm = ({ onPostSubmit }) => {
             Event
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

@@ -1,23 +1,43 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { getAllPosts, addNewPost } from "@/lib/posts";
 import PostForm from "@/components/PostForm/PostForm";
-import SocialCard from "@/components/SocialCard/SocialCard";
 import Feed from "@/components/Feed/Feed";
+import { getAllPosts, addNewPost } from "@/lib/posts";
+import { Users } from "@/lib/users";
+import { SamplePosts } from "@/lib/posts";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(Users[0]); // default user
 
   // Load initial posts
+
   useEffect(() => {
-    const initialPosts = getAllPosts();
-    setPosts(initialPosts);
+    const storedPosts = localStorage.getItem("posts");
+    if (storedPosts) {
+      setPosts(JSON.parse(storedPosts));
+    } else {
+      setPosts(SamplePosts); // fallback sample posts
+    }
   }, []);
 
-  // Handle new post submission
   const handlePostSubmit = (newPost) => {
-    const updatedPosts = addNewPost(newPost);
+    const updatedPosts = [newPost, ...posts];
     setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts)); // persist
+  };
+  const handleDeletePost = (id) => {
+    const updatedPosts = posts.filter((p) => p.id !== id);
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+  };
+  const handleSwitchUser = () => {
+    const currentIndex = Users.findIndex(
+      (u) => u.username === currentUser.username
+    );
+    const nextUser = Users[(currentIndex + 1) % Users.length];
+    setCurrentUser(nextUser);
   };
 
   return (
@@ -26,8 +46,20 @@ export default function Home() {
       <div className="w-full lg:[70%] xl:[50%]">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-6">
-            <PostForm onPostSubmit={handlePostSubmit} />
-            <Feed />
+            {/* Post Form */}
+            <PostForm
+              currentUser={currentUser}
+              onPostSubmit={handlePostSubmit}
+              onSwitchUser={handleSwitchUser}
+            />
+            {/* Feed */}
+            {posts.length > 0 ? (
+              <Feed posts={posts} onDelete={handleDeletePost} />
+            ) : (
+              <p className="py-8 text-center text-gray-500">
+                No posts available. Create your first post!
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -1,45 +1,68 @@
 import React from "react";
 import Image from "next/image";
 import Comments from "@/components/Feed/Comments";
-const Post = () => {
+import { useState, useRef } from "react";
+import useClickOutside from "@/hooks/useClickOutside";
+const Post = ({ post, onDelete }) => {
+  if (!post) return null;
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+  useClickOutside(menuRef, () => setShowMenu(false));
+
   return (
     <div className="flex flex-col gap-4">
       {/* USER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Image
-            src="https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
-            alt=""
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full"
-          />
-          <span className="font-medium">Jane Doe</span>
+          {post.author && post.author.avatar ? (
+            <Image
+              src={post.author.avatar}
+              alt={post.author.name || "User avatar"}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gray-300 rounded-full" />
+          )}
+          <span className="font-medium">
+            {post.author?.name || "Unknown User"}
+          </span>
         </div>
-        <Image
-          src="/img/more.png"
-          alt=""
-          width={16}
-          height={16}
-          className="cursor-pointer"
-        />
+        <div className="relative" ref={menuRef}>
+          <Image
+            src="/img/more.png"
+            alt="More"
+            width={16}
+            height={16}
+            className="cursor-pointer"
+            onClick={() => setShowMenu(!showMenu)}
+          />
+          {showMenu && (
+            <div className="absolute right-0 z-10 w-20 overflow-hidden bg-white rounded-md shadow-lg ">
+              <button
+                className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-100 focus:outline-none"
+                onClick={() => onDelete(post.id)}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {/* DESC */}
       <div className="flex flex-col gap-4">
         <div className="relative w-full min-h-96">
-          <Image
-            src="https://images.pexels.com/photos/730256/pexels-photo-730256.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
-            alt=""
-            fill
-            className="object-cover rounded-md"
-          />
+          {post.image ? (
+            <Image
+              src={post.image}
+              alt="Post image"
+              fill
+              className="object-cover rounded-md"
+            />
+          ) : null}
         </div>
-        <p>
-          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Odit hic eum
-          iure cupiditate eos magnam ratione natus quisquam tenetur. Distinctio
-          iusto possimus nihil sapiente blanditiis error quod nesciunt beatae
-          dolorum?
-        </p>
+        <p>{post.content}</p>
       </div>
       {/* INTERACTIONS */}
       <div className="flex items-center justify-between my-4 text-sm">
@@ -54,7 +77,8 @@ const Post = () => {
             />
             <span className="text-gray-300">|</span>
             <span className="text-gray-500">
-              123<span className="hidden md:inline"> Likes</span>
+              {post.likes}
+              <span className="hidden md:inline"> Likes</span>
             </span>
           </div>
           <div className="flex items-center gap-4 p-2 bg-slate-100 rounded-xl">
@@ -67,7 +91,8 @@ const Post = () => {
             />
             <span className="text-gray-300">|</span>
             <span className="text-gray-500">
-              123<span className="hidden md:inline"> Comments</span>
+              {post.comments.length}
+              <span className="hidden md:inline"> Comments</span>
             </span>
           </div>
         </div>
@@ -82,7 +107,8 @@ const Post = () => {
             />
             <span className="text-gray-300">|</span>
             <span className="text-gray-500">
-              123<span className="hidden md:inline"> Shares</span>
+              {post.shares}
+              <span className="hidden md:inline"> Shares</span>
             </span>
           </div>
         </div>
