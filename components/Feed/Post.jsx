@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
 import useClickOutside from "@/hooks/useClickOutside";
-import PostInteraction from "./PostInteraction";
-import CommentList from "./CommentList";
+import PostInteraction from "@/components/Feed/PostInteraction";
+import CommentList from "@/components/Feed/CommentList";
 import { useUser } from "@/context/UserContext";
 
 const Post = ({ post, onDelete, onUpdatePost }) => {

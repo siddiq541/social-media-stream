@@ -4,7 +4,6 @@ import { react, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import MobileMenu from "./MobileMenu";
-import AddPost from "@/app/Add-Post/page";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,27 +66,5 @@ export default function Navbar() {
         <MobileMenu />
       </div>
     </nav>
-    // <nav className="px-6 py-4 text-white bg-purple-700">
-    //   <div className="flex items-center justify-between">
-    //     <Link href="/" className="text-xl font-bold hover:underline">
-    //       Social Stream
-    //     </Link>
-    //     <button
-    //       type="button"
-    //       className="flex items-center px-3 py-2 text-white border border-white rounded lg:hidden hover:bg-purple-600"
-    //       onClick={() => setIsMenuOpen(!isMenuOpen)}
-    //       aria-label="Toggle menu"
-    //       aria-expanded={isMenuOpen}
-    //     >
-    //       <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-    //         <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-    //       </svg>
-    //     </button>
-    //   </div>
-
-    //   <div className=""/*{`/*mt-4 lg:mt-0 ${isMenuOpen ? 'block' : 'hidden'} lg:flex lg:items-center`}*/>
-    //   <MobileMenu/>
-    //   </div>
-    // </nav>
   );
 }

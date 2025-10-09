@@ -2,9 +2,9 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import AddPostButton from "./AddPostButton";
+import AddPostButton from "@/components/PostForm/AddPostButton";
 import useClickOutside from "@/hooks/useClickOutside";
-import ImageUploadCard from "./ImageUploadCard";
+import ImageUploadCard from "@/components/PostForm/ImageUploadCard";
 import { useUser } from "@/context/UserContext";
 import {
   Popover,
