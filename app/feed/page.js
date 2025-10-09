@@ -1,27 +1,81 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import SocialCard from '../../components/SocialCard/SocialCard';
+import { useState, useEffect, useMemo } from "react";
+import PostForm from "@/components/PostForm/PostForm";
+import Feed from "@/components/Feed/Feed";
+import { Users } from "@/lib/users";
+import { SamplePosts } from "@/lib/posts";
+import { useUser } from "@/context/UserContext";
 
-export default function Feed() {
+export default function UserFeedPage() {
   const [posts, setPosts] = useState([]);
+  const { currentUser, switchUser } = useUser();
+
+  // Load posts from localStorage or sample posts
+  useEffect(() => {
+    // Load posts from localStorage
+    const storedPosts = JSON.parse(localStorage.getItem("posts") || "[]");
+
+    if (storedPosts.length === 0) {
+      // If no posts, only show posts from SamplePosts that match currentUser
+      const initialPosts = SamplePosts.filter(
+        (p) => p.userId === currentUser.id
+      );
+      setPosts(initialPosts);
+    } else {
+      setPosts(storedPosts);
+    }
+  }, [currentUser]); // re-run when currentUser changes
+
+  // const userPosts = useMemo(() => {
+  //   return posts.filter((p) => p.userId === currentUser.id);
+  // }, [posts, currentUser]);
+  const userPosts = posts.filter((p) => p.userId === currentUser.id);
+
+  const handlePostSubmit = (newPost) => {
+    const updatedPosts = [newPost, ...posts];
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+  };
+
+  const handleDeletePost = (id) => {
+    const updatedPosts = posts.filter((p) => p.id !== id);
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+  };
+
+  const handleUpdateComments = (postId, updatedComments) => {
+    const updatedPosts = posts.map((p) =>
+      p.id === postId ? { ...p, comments: updatedComments } : p
+    );
+    setPosts(updatedPosts);
+    localStorage.setItem("posts", JSON.stringify(updatedPosts));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Social Media Feed</h1>
-          <p className="text-gray-600 mt-2">Latest posts from the community</p>
+    <div className="min-h-screen">
+      <div className="container py-8 mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Social Media Feed
+          </h1>
+          <p className="my-4 text-gray-600">Add posts here.</p>
+
+          {/* POST FORM */}
+          <PostForm
+            currentUser={currentUser}
+            onPostSubmit={handlePostSubmit}
+            onSwitchUser={switchUser}
+          />
         </div>
 
         <div className="space-y-4">
-          {posts.length > 0 ? (
-            posts.map(post => (
-              <SocialCard key={post.id} post={post} />
-            ))
+          {/* FEED */}
+          {userPosts.length > 0 ? (
+            <Feed posts={userPosts} onDelete={handleDeletePost} />
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No posts available. Create your first post!</p>
+            <div className="py-8 text-center text-gray-500">
+              <p>No posts available for {currentUser.name}.</p>
             </div>
           )}
         </div>
