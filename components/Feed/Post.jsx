@@ -1,23 +1,77 @@
-import React from "react";
+// "use client";
+
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
-import Comments from "@/components/Feed/Comments";
-import { useState, useRef } from "react";
 import useClickOutside from "@/hooks/useClickOutside";
-const Post = ({ post, onDelete }) => {
+import PostInteraction from "./PostInteraction";
+import CommentList from "./CommentList";
+import { useUser } from "@/context/UserContext";
+
+const Post = ({ post, onDelete, onUpdatePost }) => {
   if (!post) return null;
+
+  const { currentUser } = useUser();
+  const [postData, setPostData] = useState(post);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
   useClickOutside(menuRef, () => setShowMenu(false));
+
+  // Load the latest saved post from localStorage (if present)
+  useEffect(() => {
+    const storedPosts = JSON.parse(localStorage.getItem("posts") || "[]");
+    // use == so string/number id mismatch won't break
+    const stored = storedPosts.find((p) => p.id == post.id);
+    if (stored) setPostData(stored);
+    else setPostData(post);
+  }, [post]);
+
+  // Save any postData change to localStorage and notify parent
+  useEffect(() => {
+    const storedPosts = JSON.parse(localStorage.getItem("posts") || "[]");
+    const exists = storedPosts.some((p) => p.id == postData.id);
+    let updated;
+    if (exists) {
+      updated = storedPosts.map((p) => (p.id == postData.id ? postData : p));
+    } else {
+      updated = [postData, ...storedPosts];
+    }
+
+    localStorage.setItem("posts", JSON.stringify(updated));
+
+    // ✅ only call parent update if data really changed
+    if (onUpdatePost) {
+      const stored = storedPosts.find((p) => p.id == postData.id);
+      const hasChanged = JSON.stringify(stored) !== JSON.stringify(postData);
+      if (hasChanged) onUpdatePost(postData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postData]);
+
+  // Toggle like — owned by Post (single source of truth)
+  const handleToggleLike = () => {
+    if (!currentUser) return;
+    const isLiked = (postData.likes || []).includes(currentUser.id);
+    const newLikes = isLiked
+      ? (postData.likes || []).filter((id) => id !== currentUser.id)
+      : [...(postData.likes || []), currentUser.id];
+
+    setPostData({ ...postData, likes: newLikes });
+  };
+
+  // Called by CommentList via props to update comments
+  const handleUpdateComments = (updatedComments) => {
+    setPostData({ ...postData, comments: updatedComments });
+  };
 
   return (
     <div className="flex flex-col gap-4">
       {/* USER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {post.author && post.author.avatar ? (
+          {postData.author && postData.author.avatar ? (
             <Image
-              src={post.author.avatar}
-              alt={post.author.name || "User avatar"}
+              src={postData.author.avatar}
+              alt={postData.author.name || "User avatar"}
               width={40}
               height={40}
               className="rounded-full"
@@ -26,9 +80,10 @@ const Post = ({ post, onDelete }) => {
             <div className="w-10 h-10 bg-gray-300 rounded-full" />
           )}
           <span className="font-medium">
-            {post.author?.name || "Unknown User"}
+            {postData.author?.name || "Unknown User"}
           </span>
         </div>
+
         <div className="relative" ref={menuRef}>
           <Image
             src="/img/more.png"
@@ -42,7 +97,7 @@ const Post = ({ post, onDelete }) => {
             <div className="absolute right-0 z-10 w-20 overflow-hidden bg-white rounded-md shadow-lg ">
               <button
                 className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-100 focus:outline-none"
-                onClick={() => onDelete(post.id)}
+                onClick={() => onDelete(postData.id)}
               >
                 Delete
               </button>
@@ -50,70 +105,42 @@ const Post = ({ post, onDelete }) => {
           )}
         </div>
       </div>
-      {/* DESC */}
+
+      {/* CONTENT */}
       <div className="flex flex-col gap-4">
-        <div className="relative w-full min-h-96">
-          {post.image ? (
+        {postData.image && (
+          <div className="relative w-full min-h-96">
             <Image
-              src={post.image}
+              src={postData.image}
               alt="Post image"
               fill
               className="object-cover rounded-md"
             />
-          ) : null}
-        </div>
-        <p>{post.content}</p>
+          </div>
+        )}
+        <p>{postData.content}</p>
       </div>
-      {/* INTERACTIONS */}
-      <div className="flex items-center justify-between my-4 text-sm">
-        <div className="flex gap-8">
-          <div className="flex items-center gap-4 p-2 bg-slate-50 rounded-xl">
-            <Image
-              src="/img/like.png"
-              alt=""
-              width={16}
-              height={16}
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              {post.likes}
-              <span className="hidden md:inline"> Likes</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-4 p-2 bg-slate-100 rounded-xl">
-            <Image
-              src="/img/comment.png"
-              alt=""
-              width={16}
-              height={16}
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              {post.comments.length}
-              <span className="hidden md:inline"> Comments</span>
-            </span>
-          </div>
-        </div>
-        <div className="">
-          <div className="flex items-center gap-4 p-2 bg-slate-100 rounded-xl">
-            <Image
-              src="/img/share.png"
-              alt=""
-              width={16}
-              height={16}
-              className="cursor-pointer"
-            />
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-500">
-              {post.shares}
-              <span className="hidden md:inline"> Shares</span>
-            </span>
-          </div>
-        </div>
-      </div>
-      <Comments />
+
+      {/* INTERACTION (presentational) */}
+      <Suspense fallback="Loading...">
+        <PostInteraction
+          // pass the live likes/comments from postData
+          postId={postData.id}
+          likes={postData.likes || []}
+          commentNumber={(postData.comments || []).length}
+          onToggleLike={handleToggleLike} // <- important
+        />
+      </Suspense>
+
+      {/* COMMENTS (presentational but calls back) */}
+      <Suspense fallback="Loading...">
+        <CommentList
+          postId={postData.id}
+          comments={postData.comments || []}
+          // comment list should call this when comments change (add/delete/like)
+          setComments={handleUpdateComments}
+        />
+      </Suspense>
     </div>
   );
 };

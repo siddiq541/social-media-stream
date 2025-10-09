@@ -1,5 +1,6 @@
 import "./globals.css";
 import NavBar from "@/components/NavBar/NavBar";
+import { UserProvider } from "@/context/UserContext";
 
 export const metadata = {
   title: "Social Stream",
@@ -15,7 +16,7 @@ export default function RootLayout({ children }) {
           <NavBar />
         </div>
         <div className="px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
-          {children}
+          <UserProvider>{children}</UserProvider>
         </div>
       </body>
     </html>

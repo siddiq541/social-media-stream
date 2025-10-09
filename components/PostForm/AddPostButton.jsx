@@ -1,16 +1,13 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-
-const AddPostButton = () => {
-  const { pending } = useFormStatus();
+const AddPostButton = ({ isSubmitting }) => {
   return (
     <button
-      className="p-2 mt-2 text-white bg-blue-500 rounded-md disabled:bg-blue-300 disabled:cursor-not-allowed"
-      disabled={pending}
+      className="p-2 mt-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+      disabled={isSubmitting}
       type="submit"
     >
-      {pending ? (
+      {isSubmitting ? (
         <div className="flex items-center gap-2">
           <div className="inline-block h-[10px] w-[10px] animate-spin rounded-full border-2 border-white-300 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite]" />
           Sending

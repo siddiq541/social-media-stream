@@ -4,70 +4,106 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import AddPostButton from "./AddPostButton";
 import useClickOutside from "@/hooks/useClickOutside";
-const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
+import ImageUploadCard from "./ImageUploadCard";
+import { useUser } from "@/context/UserContext";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+
+const PostForm = ({ onPostSubmit }) => {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
-  const emojis = ["😊", "😂", "❤️", "👍", "🔥"];
+  const [selectedImage, setSelectedImage] = useState(null);
 
+  const emojis = ["😊", "😂", "❤️", "👍", "🔥"];
   const emojiRef = useRef(null);
+  const { currentUser, switchUser } = useUser();
+
+  // Close emoji picker when clicking outside
   useClickOutside(emojiRef, () => setShowEmojis(false));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!content.trim()) {
-      alert("Please enter some content for your post");
+    if (!content.trim() && !selectedImage) {
+      alert("Please enter content or select an image");
       return;
     }
 
     setIsSubmitting(true);
 
-    // Create new post object
-    const newPost = {
-      id: Date.now(), // Simple ID generation
-      author: currentUser, // use the passed current user
-      content: content.trim(),
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      comments: [], // initialize as empty array
-      shares: 0,
-      image: null,
-    };
+    try {
+      let imageData = null;
 
-    // Call the parent component's callback to add the post
-    if (onPostSubmit) {
-      onPostSubmit(newPost);
+      if (selectedImage) {
+        imageData = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Failed to read image"));
+          reader.readAsDataURL(selectedImage);
+        });
+      }
+
+      const newPost = {
+        id: Date.now(),
+        userId: currentUser.id, // ✅ needed for filtering
+        author: {
+          id: currentUser.id,
+          name: currentUser.name,
+          username: currentUser.username,
+          avatar: currentUser.avatar,
+        },
+        content: content.trim(),
+        timestamp: new Date().toISOString(),
+        likes: [],
+        comments: [],
+        shares: 0,
+        image: imageData,
+      };
+
+      try {
+        if (onPostSubmit) await onPostSubmit(newPost);
+      } catch (err) {
+        console.error("Post submission failed:", err);
+        alert("Failed to submit post.");
+      }
+
+      // Reset form
+      setContent("");
+      setSelectedImage(null);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Reset form
-    setContent("");
-    setIsSubmitting(false);
   };
 
   return (
     <div className="flex justify-between gap-4 p-4 text-sm bg-white rounded-lg shadow-md md:mx-auto md:w-3/4 xl:w-[60%] xl:mx-auto">
-      {/* AVATAR */}
+      {/* User Avatar */}
       <Image
-        src={currentUser?.avatar || "/img/profile.png"} // fallback in case avatar is missing
+        src={currentUser?.avatar || "/img/profile.png"}
         alt={currentUser?.name || "User avatar"}
         width={48}
         height={48}
-        onClick={onSwitchUser} // handler passed from page
+        onClick={switchUser}
         className="object-cover w-12 h-12 rounded-full cursor-pointer"
       />
-      {/* POST */}
-      <form onSubmit={handleSubmit} className="flex-1">
-        {/* TEXT INPUT */}
+
+      {/* Post Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1 gap-4">
+        {/* Textarea + Emoji */}
         <div className="flex gap-4">
           <textarea
-            name="desc"
-            id=""
             placeholder="What's on your mind?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="flex-1 p-2 rounded-lg bg-slate-100"
-          ></textarea>
+          />
           <div className="relative">
             <Image
               src="/img/emoji.png"
@@ -75,7 +111,7 @@ const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
               width={20}
               height={20}
               onClick={() => setShowEmojis(!showEmojis)}
-              className="self-end w-5 h-5 cursor-pointer"
+              className="w-5 h-5 cursor-pointer"
             />
             {showEmojis && (
               <div
@@ -87,9 +123,7 @@ const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
                   <button
                     key={emoji}
                     type="button"
-                    onClick={() => {
-                      setContent((prev) => prev + emoji);
-                    }}
+                    onClick={() => setContent((prev) => prev + emoji)}
                     className="text-2xl transition-transform hover:scale-110"
                   >
                     {emoji}
@@ -97,15 +131,26 @@ const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
                 ))}
               </div>
             )}
+            {/* Submit Button */}
+            <div className="flex justify-end">
+              <AddPostButton isSubmitting={isSubmitting} />
+            </div>
           </div>
-          <AddPostButton />
         </div>
-        {/* POST OPTIONS */}
+
+        {/* Post Options */}
         <div className="flex flex-wrap items-center gap-4 mt-4 text-gray-400">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <Image src="/img/addImage.png" alt="" width={20} height={20} />
-            Photo
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="flex items-center gap-2 text-gray-500 cursor-pointer hover:text-blue-500">
+                <Image src="/img/addImage.png" alt="" width={20} height={20} />
+                Photo
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="p-2 w-60">
+              <ImageUploadCard onSelect={(file) => setSelectedImage(file)} />
+            </PopoverContent>
+          </Popover>
           <div className="flex items-center gap-2 cursor-pointer">
             <Image src="/img/addVideo.png" alt="" width={20} height={20} />
             Video
@@ -124,41 +169,4 @@ const PostForm = ({ onPostSubmit, currentUser, onSwitchUser }) => {
   );
 };
 
-// <div className="p-6 mb-6 bg-white rounded-lg shadow-md">
-//   <h2 className="mb-4 text-xl font-bold text-gray-800">Create a New Post</h2>
-
-//   <form onSubmit={handleSubmit}>
-//     <div className="mb-4">
-//       <textarea
-//         value={content}
-//         onChange={(e) => setContent(e.target.value)}
-//         placeholder="What's on your mind?"
-//         className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//         rows="4"
-//         maxLength="500"
-//       />
-//       <div className="mt-1 text-sm text-right text-gray-500">
-//         {content.length}/500 characters
-//       </div>
-//     </div>
-
-//     <div className="flex items-center justify-between">
-//       <div className="text-sm text-gray-500">
-//         Share your thoughts with the community
-//       </div>
-
-//       <button
-//         type="submit"
-//         disabled={isSubmitting || !content.trim()}
-//         className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-//           isSubmitting || !content.trim()
-//             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-//             : 'bg-blue-500 text-white hover:bg-blue-600'
-//         }`}
-//       >
-//         {isSubmitting ? 'Posting...' : 'Post'}
-//       </button>
-//     </div>
-//   </form>
-// </div>
 export default PostForm;
