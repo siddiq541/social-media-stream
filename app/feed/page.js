@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import PostForm from "@/components/PostForm/PostForm";
 import Feed from "@/components/Feed/Feed";
-import { Users } from "@/lib/users";
 import { SamplePosts } from "@/lib/posts";
 import { useUser } from "@/context/UserContext";
 
