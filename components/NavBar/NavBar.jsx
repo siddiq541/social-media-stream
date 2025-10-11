@@ -30,7 +30,7 @@ export default function Navbar() {
             />
             <span>Home</span>
           </Link>
-          <Link href="/Feed" className="flex items-center gap-2">
+          <Link href="/feed" className="flex items-center gap-2">
             <Image
               src="/img/feed.png"
               alt="Feed"
@@ -40,7 +40,7 @@ export default function Navbar() {
             />
             <span>Feed</span>
           </Link>
-          <Link href="/Add-Post" className="flex items-center gap-2">
+          <Link href="/add-post" className="flex items-center gap-2">
             <Image
               src="/img/addPost.png"
               alt="Add Post"
